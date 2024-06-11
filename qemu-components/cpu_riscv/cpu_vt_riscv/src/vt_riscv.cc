@@ -1,4 +1,4 @@
-#include <vt_riscv64.h>
+#include <vt_riscv.h>
 
 void module_register()
 {

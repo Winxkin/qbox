@@ -1,3 +1,3 @@
 add_subdirectory(cpu_riscv64)
-add_subdirectory(cpu_vt_riscv64)
+add_subdirectory(cpu_vt_riscv)
 add_subdirectory(cpu_sifive_x280)

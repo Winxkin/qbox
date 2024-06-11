@@ -1,1 +1,0 @@
-gs_create_dymod(cpu_vt_riscv64)
