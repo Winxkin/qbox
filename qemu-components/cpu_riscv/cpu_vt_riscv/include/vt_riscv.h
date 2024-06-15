@@ -14,13 +14,13 @@
 
 #include <libgssync.h>
 #include <module_factory_registery.h>
-#include <irq-ctrl/plic_sifive/include/plic_sifive.h>
+#include <irq-ctrl/plic_sifive/include/plic-sifive.h>
 
 #include <cpu.h>
 
 class vt_riscv64 : public QemuCpu
 {
-protected:
+public:
     uint64_t m_hartid;
     gs::async_event m_irq_ev;
     plic_sifive m_plic;
@@ -79,7 +79,7 @@ public:
 
 class vt_riscv32 : public QemuCpu
 {
-protected:
+public:
     uint64_t m_hartid;
     gs::async_event m_irq_ev;
     plic_sifive m_plic;

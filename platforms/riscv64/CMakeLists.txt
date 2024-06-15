@@ -1,7 +1,7 @@
 set(LIBQEMU_TARGETS riscv64)
 
 add_executable(riscv64-base-vp
-    src/main.cc
+    src/riscv64_cpu.cc
 )
 
 if(APPLE)

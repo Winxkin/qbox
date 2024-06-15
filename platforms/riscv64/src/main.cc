@@ -23,6 +23,12 @@
 
 #include <systemc>
 #include <cci/utils/broker.h>
+#include <tlm>
+#include <cci_configuration>
+#include <libgsutils.h>
+#include <limits>
+#include <qemu-instance.h>
+#include <module_factory_registery.h>
 
 #include <argparser.h>
 #include <cciutils.h>
@@ -39,125 +45,45 @@
 
 #include <stdio.h>
 
+
+
+
 class RiscvDemoPlatform : public sc_core::sc_module {
 
-protected:
-    // cci::cci_param<unsigned> p_riscv_num_cpus;
-    // cci::cci_param<int> p_log_level;
-
-    // gs::ConfigurableBroker m_broker;
-
-    // cci::cci_param<int> m_quantum_ns;
-    // cci::cci_param<int> m_gdb_port;
-
-    // QemuInstanceManager m_inst_mgr;
-    // // QemuInstance &m_qemu_inst;
-    // QemuCpuRiscv64 m_cpus;
-
-    // gs::router<> m_router;
-
-    /*
-     * QEMU RISC-V cpu boots at 0x1000. We put a small rom here to jump into
-     * the bootrom.
-    //  */
-    // gs::gs_memory<> m_resetvec_rom;
-
-    // gs::gs_memory<> m_rom;
-    // gs::gs_memory<> m_sram;
-    // gs::gs_memory<> m_dram;
-
-    // /* Modeled as memory */
-    // gs::gs_memory<> m_qspi;
-    // gs::gs_memory<> m_boot_gpio;
-
-    // uart_16550 m_uart;
-
-    // gs::gs_memory<> m_fallback_mem;
-
-    // gs::loader<> m_loader;
+private:
+    
+    cci::cci_broker_handle m_broker;
+    cci::cci_param<int> m_gdb_port;
+    gs::gs_memory<> m_memory;
+    gs::router<> m_router;
+    QemuInstance& m_qemu_inst;
+    cpu_riscv64 m_core_riscv64;
 
     void do_bus_binding()
     {
 
-        // m_cpus.socket.bind(m_router.target_socket);
+        m_core_riscv64.socket.bind(m_router.target_socket);
+        m_router.initiator_socket.bind(m_memory.socket);
 
-
-        // m_router.initiator_socket.bind(m_resetvec_rom.socket);
-        // m_router.initiator_socket.bind(m_rom.socket);
-        // m_router.initiator_socket.bind(m_sram.socket);
-        // m_router.initiator_socket.bind(m_dram.socket);
-        // m_router.initiator_socket.bind(m_qspi.socket);
-        // m_router.initiator_socket.bind(m_boot_gpio.socket);
-        // m_router.initiator_socket.bind(m_uart.socket);
-        
-
-        // General loader
-        // m_loader.initiator_socket.bind(m_router.target_socket);
-
-        // MUST be added last
-        // m_router.initiator_socket.bind(m_fallback_mem.socket);
     }
 
     void setup_irq_mapping() {
-        // if (p_riscv_num_cpus)
-        // {
-        //     int irq = gs::cci_get<int>(std::string(m_uart.name()) + ".irq");
-        // }
+        
     }
 
 public:
     RiscvDemoPlatform(const sc_core::sc_module_name &n)
         : sc_core::sc_module(n)
-        // , p_riscv_num_cpus("riscv_num_cpus", 1, "Number of RISCV cores")
-        // , p_log_level("log_level", 2, "Default log level")
-        // , m_broker({
-        //            {"plic.num_sources", cci::cci_value(280)},
-        //            {"plic.num_priorities", cci::cci_value(7)},
-        //            {"plic.priority_base", cci::cci_value(0x04)},
-        //            {"plic.pending_base", cci::cci_value(0x1000)},
-        //            {"plic.enable_base", cci::cci_value(0x2000)},
-        //            {"plic.enable_stride", cci::cci_value(0x80)},
-        //            {"plic.context_base", cci::cci_value(0x200000)},
-        //            {"plic.context_stride", cci::cci_value(0x1000)},
-        //            {"plic.aperture_size", cci::cci_value(0x4000000)},
-        //            {"plic.hart_config", cci::cci_value("MS,MS,MS,MS,MS")},
-
-        //            {"uart.regshift", cci::cci_value(2)},
-        //            {"uart.baudbase", cci::cci_value(38400000)},
-
-        //            {"swi.num_harts", cci::cci_value(5)},
-
-        //            {"mtimer.timecmp_base", cci::cci_value(0x0)},
-        //            {"mtimer.time_base", cci::cci_value(0xbff8)},
-        //            {"mtimer.provide_rdtime", cci::cci_value(true)},
-        //            {"mtimer.aperture_size", cci::cci_value(0x10000)},
-        //            {"mtimer.num_harts", cci::cci_value(5)},
-        //            {"mtimer.timebase_freq", cci::cci_value{1000000}},
-        // })
-        // , m_quantum_ns("quantum_ns", 1000000, "TLM-2.0 global quantum in ns")
-        // , m_gdb_port("gdb_port", 0, "GDB port")
-        // , m_loader("load")
-        // , m_qemu_inst("qemu_inst", nullptr, qemu::Target::RISCV64)
-        // , m_cpus("cpu", m_qemu_inst , "64" , 64)
-        // , m_router("router")
-        // , m_resetvec_rom("resetvec_rom", 1024)
-        // , m_rom("rom", 1024)
-        // , m_sram("sram", 1024)
-        // , m_dram("dram", 1024)
-        // , m_qspi("qspi", 1024)
-        // , m_boot_gpio("boot_gpio", 1024)
-        // , m_uart("uart", m_qemu_inst)
-        // , m_fallback_mem("fallback_memory")
+        , m_broker(cci::cci_get_broker())
+        , m_gdb_port("gdb_port", 0, "GDB port")
+        , m_qemu_inst("qemu_inst", qemu::get_default_lib_loader(), )
+        , m_router("router")
+        , m_memory("memory",1024)
+        , m_core_riscv64("core_riscv64", m_qemu_inst, 12)
         
     {
-        // using tlm_utils::tlm_quantumkeeper;
-
-        // int level = p_log_level.get_value();
-        // scp::set_logging_level(scp::as_log(level));
-
-        // sc_core::sc_time global_quantum(m_quantum_ns, sc_core::SC_NS);
-        // tlm_quantumkeeper::set_global_quantum(global_quantum);
-
+       
+        
         do_bus_binding();
         setup_irq_mapping();
     }
