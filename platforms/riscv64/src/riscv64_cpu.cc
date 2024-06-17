@@ -1,7 +1,7 @@
 #include "riscv64_cpu.h"
 #include <module_factory_container.h>
 
-class ViettelPlatform : public gs::ModuleFactory::ContainerDeferModulesConstruct
+class VSTPlatform : public gs::ModuleFactory::ContainerDeferModulesConstruct
 {
     SCP_LOGGER(());
 
@@ -9,7 +9,7 @@ protected:
     cci::cci_param<int> p_quantum_ns;
 
 public:
-    ViettelPlatform(const sc_core::sc_module_name& n)
+    VSTPlatform(const sc_core::sc_module_name& n)
         : gs::ModuleFactory::ContainerDeferModulesConstruct(n)
         , p_quantum_ns("quantum_ns", 1'000'000, "TLM-2.0 global quantum in ns")
     {
@@ -27,7 +27,7 @@ public:
         name_bind(rpass);
     }
 
-    ~ViettelPlatform() {}
+    ~VSTPlatform() {}
 };
 
 int sc_main(int argc, char* argv[])
@@ -40,7 +40,7 @@ int sc_main(int argc, char* argv[])
         { "remote_platform.quantum_ns", cci::cci_value(10'000'000) },
     });
 
-    ViettelPlatform VSTPlatform("Viettel_platform");
+    VSTPlatform remote("VSTPlatform");
     try {
         sc_core::sc_start();
     } catch (std::runtime_error const& e) {

@@ -1,68 +1,104 @@
 -- Virtual platform configuration
+-- Commented out parameters show default values
 
 function top()
     local str = debug.getinfo(2, "S").source:sub(2)
     if str:match("(.*/)")
     then
         return str:match("(.*/)")
-    else
+    else 
         return "./"
     end
  end
--- Function to retrieve the size of a file
-function fsize (file)
-    local current = file:seek()      -- get current position
-    local size = file:seek("end")    -- get file size
-    file:seek("set", current)        -- restore position
-    return size
+
+
+ BUILD_DIRECTORY = GET("build_directory")
+
+if BUILD_DIRECTORY == nil then
+    BUILD_DIRECTORY = "@BUILD_DIRECTORY@"
 end
-
-print ("Lua config running. . . ");
-
-_KERNEL_FILE = top().."fw/images/Image"
-
-local kernel_file = io.open(_KERNEL_FILE,"r")
-_KERNEL_FILE_SIZE = fsize(kernel_file);
-kernel_file:close()
-
-_OPENSBI_LOAD_ADDR = 0x70000000
-_KERNEL64_LOAD_ADDR =0x1000000000
-_DTB_ALIGN = 2 * 1024 * 1024;
-_DTB_LOAD_ADDR = ((_KERNEL64_LOAD_ADDR + _KERNEL_FILE_SIZE)
-                        & ~(_DTB_ALIGN - 1)) + _DTB_ALIGN;
-dofile (top().."fw/config/riscv64_bootloader.lua")
 
 platform = {
-    riscv_num_cpus = 5;
-    quantum_ns = 100000000;
+    moduletype = "Container";
+    quantum_ns = 10000000;
 
-    RISCVQemuInstance = { tcg_mode="MULTI", sync_policy = "multithread"};
+    -- Creating Qemu and systemC components directly
+    router = {
+        moduletype="router";
+        log_level=0;
+    },
 
-    -- cpu_0 = { gdb_port = 1234 };
+    ram_0 = {
+            moduletype = "gs_memory",
+            target_socket = {address=0x0, size=0x20000, bind = "&router.initiator_socket"},
+            shared_memory=true,
+            load={bin_file=top().."fw/cortex-m55/cortex-m55.bin", offset=0},
+        },
 
-    plic=   { mem    = {address=0x0c000000, size=0x4000000 }};
-    swi=    { mem    = {address=0x2000000, size=0x4000 }};
-    mtimer= { mem    =  {address=0x2004000, size=0x8000 }};
-    resetvec_rom= { target_socket  = {address=0x00001000, size=0x1000}, load={data={0x0400f06f}, offset=0}};
-    rom=   { target_socket  = {address=0x10000, size=64 * 1024}};
-    sram=   { target_socket  = {address=0x60000000, size=128 * 1024}};
-    dram=   { target_socket  = {address=0x1000000000, size=256 * 1024 * 1024}};
-    qspi=   { target_socket  = {address=0x70000000, size=256 * 1024 * 1024}};
-    boot_gpio={ target_socket  = {address=0xa0000010, size=0x08}, load= {data={2}, offset=0}};
-    uart=  { mem = {address= 0x54000000, size=0x10000}, irq=273};
+    keep_alive_0 = {
+        moduletype = "keep_alive";
+    },
 
-    fallback_memory = { target_socket={address=0x0, size=0x100000000}, dmi_allow=true, verbose=true};
+    charbackend_stdio_0 = {
+       moduletype = "char_backend_stdio";
+       read_write = true;
+       ansi_highlight = "";
+    };
 
-    load={
-        {bin_file=top().."fw/images/Image",    address=_KERNEL64_LOAD_ADDR};
-        {bin_file=top().."fw/images/platform.dtb", address=_DTB_LOAD_ADDR};
-        {bin_file=top().."fw/images/opensbi.bin", address=_OPENSBI_LOAD_ADDR};
-        {data=_bootloader_riscv64, address=0x10040 };
-    }
-};
+        pl011_uart_0 =  {
+        moduletype = "Pl011",
+        dylib_path = "uart-pl011";
+        target_socket = {address= 0xc0000000, size=0x1000, bind = "&router.initiator_socket"},
+        irq = {bind = "&plugin_0.target_signal_socket_0"},
+        backend_socket = { bind = "&charbackend_stdio_0.biflow_socket"  },
+        },
+    
 
-if (platform.riscv_num_cpus > 0) then
-    for i=0,(platform.riscv_num_cpus-1) do
-        platform["cpu_"..tostring(i)]=cpu;
-    end
-end
+    -- Creating platform including arm or riscv architecture
+    plugin_0 = {
+        moduletype = "RemotePass", -- can be replaced by 'Container'
+        exec_path = BUILD_DIRECTORY.."/platforms/cortex-m55-remote/remote_cpu",
+        remote_argv = {"--param=log_level=4"},
+        tlm_initiator_ports_num = 2,
+        tlm_target_ports_num = 0,
+        target_signals_num = 1,
+        initiator_signals_num = 0,
+        initiator_socket_0 = {bind = "&router.target_socket"},
+        initiator_socket_1 = {bind = "&router.target_socket"},
+
+        plugin_pass = {
+            moduletype = "RemotePass", -- -- can be replaced by 'LocalPass'
+            tlm_initiator_ports_num = 0,
+            tlm_target_ports_num = 2,
+            target_signals_num = 0,
+            initiator_signals_num = 1,
+            target_socket_0 = {address = 0x0, size = 0xE000E000, bind = "&cpu_0.router.initiator_socket"},
+            target_socket_1 = {address = 0xE000E000 + 0x10000 , size = 0x100000, bind = "&cpu_0.router.initiator_socket"},
+            initiator_signal_socket_0 = {bind = "&cpu_0.cpu.plic.irq_in_0"},
+        },
+
+        qemu_inst_mgr = {
+            moduletype = "QemuInstanceManager",
+        },
+
+        qemu_inst = {
+            moduletype = "QemuInstance",
+            args = {"&qemu_inst_mgr", "AARCH64"},
+            sync_policy = "multithread-freerunning",
+        },
+
+        cpu_0={
+            moduletype = "Riscv64CPU",
+            args = {"&qemu_inst"},
+            cpu = {
+                plic = { mem = { address = 0xE000E000, size = 0x10000}, num_sources = 1 },
+            },
+            memory = { 
+                target_socket = {address = 0xE001E000 , size = 0x10000 , bind = "&router.target_socket"},
+                shared_memory=true,
+            },
+
+        },
+    },
+    
+}

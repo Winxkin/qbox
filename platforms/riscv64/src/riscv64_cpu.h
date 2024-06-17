@@ -15,6 +15,7 @@
 #include "remote.h"
 #include "pass/include/pass.h"
 #include <module_factory_registery.h>
+#include "RTL_Models/dummy/include/dummy.h"
 
 class Riscv64CPU : public sc_core::sc_module
 {
@@ -32,6 +33,7 @@ public:
         , m_qemu_inst(qemu_inst)
         , m_router("router")
         , m_cpu("cpu", m_qemu_inst, 64)
+        , m_memory("memory", 0x10000)
     {
         unsigned int m_irq_num = m_broker.get_param_handle(std::string(this->name()) + ".cpu.nvic.num_irq")
                                      .get_cci_value()
@@ -43,6 +45,7 @@ public:
 
         m_router.initiator_socket.bind(m_cpu.m_plic.socket);
         m_cpu.socket.bind(m_router.target_socket);
+        m_memory.socket.bind(m_router.target_socket);
     }
 
 private:
@@ -51,6 +54,8 @@ private:
     QemuInstance& m_qemu_inst;
     gs::router<> m_router;
     vt_cpu_riscv64 m_cpu;
+    gs::gs_memory m_memory;
+    
 };
 GSC_MODULE_REGISTER(Riscv64CPU, sc_core::sc_object*);
 #endif
