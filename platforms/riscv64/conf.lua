@@ -94,9 +94,10 @@ platform = {
                 plic = { mem = { address = 0xE000E000, size = 0x10000}, num_sources = 1 },
             },
             memory = { 
-                target_socket = {address = 0xE001E000 , size = 0x10000 , bind = "&router.target_socket"},
+                target_socket = {address = 0xE001E000 , size = 0x10000 },
                 shared_memory=true,
             },
+            
 
         },
     },

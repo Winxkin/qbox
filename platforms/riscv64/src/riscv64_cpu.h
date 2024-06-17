@@ -43,11 +43,15 @@ public:
 
         SCP_INFO(()) << "number of irqs  = " << m_irq_num;
 
+        do_bus_binding();
+    }
+
+    do_bus_binding()
+    {
         m_router.initiator_socket.bind(m_cpu.m_plic.socket);
         m_cpu.socket.bind(m_router.target_socket);
         m_memory.socket.bind(m_router.target_socket);
     }
-
 private:
     cci::cci_broker_handle m_broker;
     cci::cci_param<int> m_gdb_port;
