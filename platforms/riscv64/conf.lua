@@ -83,7 +83,7 @@ platform = {
 
         qemu_inst = {
             moduletype = "QemuInstance",
-            args = {"&qemu_inst_mgr", "AARCH64"},
+            args = {"&qemu_inst_mgr", "RISCV64"},
             sync_policy = "multithread-freerunning",
         },
 
