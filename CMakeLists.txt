@@ -5,6 +5,9 @@ project(qbox VERSION 2.0)
 # ----- fetch GreenSocs cmake BOILERPLATE
 ##############################################
 set(GREENSOCS_GIT "" CACHE STRING "Git directory from which to clone all gs repositories")
+set(WITHOUT_QEMU OFF)
+
+message(STATUS "WITHOUT_QEMU = ${WITHOUT_QEMU}")
 
 execute_process(COMMAND git config --get remote.origin.url
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -169,6 +172,7 @@ add_library(${PROJECT_NAME} SHARED
 build_lua()
 
 if (NOT WITHOUT_QEMU)
+    message(STATUS "USING LIBQEMU: YES")
     # This is a hack to workaround a CMake issue. We specify an existing file which
     # is _not_ a submodule so that FetchContent does not init any submodule.
     # See https://gitlab.kitware.com/cmake/cmake/-/issues/20579
@@ -187,9 +191,12 @@ if (NOT WITHOUT_QEMU)
         #   - evaluate it as a generator expression since it can contains
         #     $<BUILD_INTERFACE> and $<INSTALL_INTERFACE> in a list
         #   - join the result to remove empty elements in the final list
+        message(STATUS "TARGET = LIBQEMU_TARGET_${target}_LIBRARY")
         target_compile_definitions(${PROJECT_NAME}
             PRIVATE
                 LIBQEMU_TARGET_${target}_LIBRARY="$<JOIN:$<GENEX_EVAL:$<TARGET_PROPERTY:libqemu-${target},INTERFACE_LINK_LIBRARIES>>,>")
+
+        message(STATUS "LIBQEMU_TARGET_${target}_LIBRARY = $<JOIN:$<GENEX_EVAL:$<TARGET_PROPERTY:libqemu-${target},INTERFACE_LINK_LIBRARIES>>,>")
     endforeach()
 
     target_include_directories(
