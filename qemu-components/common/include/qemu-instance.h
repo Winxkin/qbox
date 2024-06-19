@@ -264,13 +264,32 @@ protected:
 
     Target strtotarget(std::string s)
     {
-        if (s == "AARCH64") {
+        if (s == "AARCH64") 
+        {
             return QemuInstance::Target::AARCH64;
-        } else if (s == "RISCV64") {
+        } 
+        else if (s == "RISCV64") 
+        {
             return QemuInstance::Target::RISCV64;
-        } else if (s == "HEXAGON") {
+        } 
+        else if (s == "HEXAGON") 
+        {
             return QemuInstance::Target::HEXAGON;
-        } else {
+        } 
+        else if (s == "RISCV32") 
+        {
+            return QemuInstance::Target::RISCV32;
+        }
+        else if (s == "MICROBLAZE") 
+        {
+            return QemuInstance::Target::MICROBLAZE;
+        }
+        else if (s == "MICROBLAZEEL") 
+        {
+            return QemuInstance::Target::MICROBLAZEEL;
+        } 
+        else 
+        {
             SCP_FATAL(()) << "Unable to find QEMU target container";
         }
         __builtin_unreachable();
