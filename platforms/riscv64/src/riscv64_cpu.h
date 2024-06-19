@@ -28,6 +28,7 @@ public:
     }
     Riscv64CPU(const sc_core::sc_module_name& n, QemuInstance& qemu_inst)
         : sc_core::sc_module(n)
+        // , sysclk("systemclk, ")
         , m_broker(cci::cci_get_broker())
         , m_gdb_port("gdb_port", 0, "GDB port")
         , m_qemu_inst(qemu_inst)
@@ -46,19 +47,23 @@ public:
         do_bus_binding();
     }
 
-    do_bus_binding()
+    void do_bus_binding()
     {
         m_router.initiator_socket.bind(m_cpu.m_plic.socket);
         m_cpu.socket.bind(m_router.target_socket);
         m_memory.socket.bind(m_router.target_socket);
     }
+
+public:
+    sc_core::sc_clock sysclk;
+
 private:
     cci::cci_broker_handle m_broker;
     cci::cci_param<int> m_gdb_port;
     QemuInstance& m_qemu_inst;
     gs::router<> m_router;
     vt_cpu_riscv64 m_cpu;
-    gs::gs_memory m_memory;
+    gs::gs_memory<> m_memory;
     
 };
 GSC_MODULE_REGISTER(Riscv64CPU, sc_core::sc_object*);
