@@ -2,4 +2,4 @@
 
 # # Configure the build with CMake
 cd ..
-./build/platforms/platforms-vp --gs_luafile config/conf.lua
+./build/platforms/platforms-vp --gs_luafile platforms/ubuntu/conf.lua
