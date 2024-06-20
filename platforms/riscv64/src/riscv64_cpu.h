@@ -36,7 +36,7 @@ public:
         , m_cpu("cpu", m_qemu_inst, 64)
         , m_memory("memory", 0x10000)
     {
-        unsigned int m_irq_num = m_broker.get_param_handle(std::string(this->name()) + ".cpu.nvic.num_irq")
+        unsigned int m_irq_num = m_broker.get_param_handle(std::string(this->name()) + ".cpu.plic.num_sources")
                                      .get_cci_value()
                                      .get_uint();
 

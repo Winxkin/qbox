@@ -36,8 +36,8 @@ int sc_main(int argc, char* argv[])
     std::cout << "Passed arguments: " << std::endl;
     for (int i = 0; i < 2; i++) std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
     auto m_broker = new gs::ConfigurableBroker({
-        { "remote_platform.moduletype", cci::cci_value("ContainerDeferModulesConstruct") },
-        { "remote_platform.quantum_ns", cci::cci_value(10'000'000) },
+        { "VSTPlatform.moduletype", cci::cci_value("ContainerDeferModulesConstruct") },
+        { "VSTPlatform.quantum_ns", cci::cci_value(10'000'000) },
     });
 
     VSTPlatform remote("VSTPlatform");

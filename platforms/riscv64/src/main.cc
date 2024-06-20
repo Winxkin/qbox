@@ -13,7 +13,7 @@
 
 #include <cciutils.h>
 #include <argparser.h>
-#include "remote_cpu.h"
+#include "riscv64_cpu.h"
 
 #include <keep_alive/include/keep_alive.h>
 #include <module_factory_container.h>

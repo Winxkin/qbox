@@ -57,7 +57,7 @@ platform = {
     -- Creating platform including arm or riscv architecture
     plugin_0 = {
         moduletype = "RemotePass", -- can be replaced by 'Container'
-        exec_path = BUILD_DIRECTORY.."/platforms/cortex-m55-remote/remote_cpu",
+        exec_path = BUILD_DIRECTORY.."/platforms/riscv64/riscv64_cpu",
         remote_argv = {"--param=log_level=4"},
         tlm_initiator_ports_num = 2,
         tlm_target_ports_num = 0,
