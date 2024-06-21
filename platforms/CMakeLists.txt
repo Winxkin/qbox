@@ -47,3 +47,4 @@ else()
 endif()
 
 add_subdirectory(cortex-m55-remote)
+add_subdirectory(riscv64)

@@ -10,7 +10,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Packages")
   message(STATUS "Using Packages cache")
   set(ENV{CPM_SOURCE_CACHE} "${PROJECT_SOURCE_DIR}/Packages")
   set(PROJECT_PATH ${PROJECT_SOURCE_DIR})
-  set(GREENSOCS_GIT "https://gitlab.qualcomm.com/qqvp/")
+  set(GREENSOCS_GIT "https://github.com/Winxkin/")
 endif()
 
 macro(gs_addexpackage)

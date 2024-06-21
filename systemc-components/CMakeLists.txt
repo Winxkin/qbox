@@ -14,4 +14,5 @@ add_subdirectory(timeprinter)
 add_subdirectory(tlm_bus_width_bridges)
 add_subdirectory(uart)
 add_subdirectory(realtimelimiter)
-add_subdirectory(dmi_converter)
+# add_subdirectory(RTL_Models)
+
