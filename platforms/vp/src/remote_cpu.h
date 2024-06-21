@@ -46,15 +46,7 @@ public:
         , m_cpu("cpu", m_qemu_inst, 64)
     {
         SCP_INFO(()) << "RemoteCPU constructor";
-        unsigned int m_irq_num = m_broker.get_param_handle(std::string(this->name()) + ".cpu.plic.num_sources")
-                                     .get_cci_value()
-                                     .get_uint();
-
-        if (!m_gdb_port.is_default_value()) m_cpu.p_gdb_port = m_gdb_port;
-
-        SCP_INFO(()) << "number of irqs  = " << m_irq_num;
-
-        m_router.initiator_socket.bind(m_cpu.m_plic.socket);
+        
         m_cpu.socket.bind(m_router.target_socket);
     }
 
@@ -63,7 +55,7 @@ private:
     cci::cci_param<int> m_gdb_port;
     QemuInstance& m_qemu_inst;
     gs::router<> m_router;
-    vt_cpu_riscv64 m_cpu;
+    cpu_riscv64 m_cpu;
 };
 GSC_MODULE_REGISTER(RemoteCPU, sc_core::sc_object*);
 #endif

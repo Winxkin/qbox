@@ -71,7 +71,7 @@ platform = {
             initiator_signals_num = 1,
             target_socket_0 = {address = 0x0, size = 0xE000E000, bind = "&cpu_0.router.initiator_socket"},
             target_socket_1 = {address = 0xE000E000 + 0x10000 , size = 0x100000, bind = "&cpu_0.router.initiator_socket"},
-            initiator_signal_socket_0 = {bind = "&cpu_0.cpu.plic.irq_in_0"},
+            -- initiator_signal_socket_0 = {bind = "&cpu_0.cpu.plic.irq_in_0"},
         },
 
         qemu_inst_mgr = {
@@ -87,11 +87,13 @@ platform = {
         cpu_0={
             moduletype = "RemoteCPU",
             args = {"&qemu_inst"},
-            cpu = {
-                plic = { mem = { address = 0xE000E000, size = 0x10000}, num_sources = 1 },
-            },
-
         },
+
+        ram_1 = {
+            moduletype = "gs_memory",
+            target_socket = {address = 0xE001E000 , size = 0x10000 , bind = "&cpu_0.router.initiator_socket"},
+            shared_memory=true,
+        }
     },
     
 }
