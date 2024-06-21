@@ -15,14 +15,13 @@ function top()
  BUILD_DIRECTORY = GET("build_directory")
 
 if BUILD_DIRECTORY == nil then
-    BUILD_DIRECTORY = "/mnt/d/HuanNguyen/mygit/qbox/build"
+    BUILD_DIRECTORY = "/mnt/d/HuanNguyen/Viettel/qbox/build"
 end
 
 platform = {
     moduletype = "Container";
     quantum_ns = 10000000;
 
-    -- Creating Qemu and systemC components directly
     router = {
         moduletype="router";
         log_level=0;
@@ -32,7 +31,7 @@ platform = {
             moduletype = "gs_memory",
             target_socket = {address=0x0, size=0x20000, bind = "&router.initiator_socket"},
             shared_memory=true,
-            load={bin_file=top().."fw/cortex-m55/cortex-m55.bin", offset=0},
+            load={bin_file=top().."fw/vp/cortex-m55.bin", offset=0},
         },
 
     keep_alive_0 = {
@@ -52,12 +51,10 @@ platform = {
         irq = {bind = "&plugin_0.target_signal_socket_0"},
         backend_socket = { bind = "&charbackend_stdio_0.biflow_socket"  },
         },
-    
 
-    -- Creating platform including arm or riscv architecture
     plugin_0 = {
         moduletype = "RemotePass", -- can be replaced by 'Container'
-        exec_path = BUILD_DIRECTORY.."/platforms/riscv64/riscv_cpu",
+        exec_path = BUILD_DIRECTORY.."/platforms/vp/vp_cpu",
         remote_argv = {"--param=log_level=4"},
         tlm_initiator_ports_num = 2,
         tlm_target_ports_num = 0,
@@ -88,17 +85,11 @@ platform = {
         },
 
         cpu_0={
-            moduletype = "RiscvCPU",
-            num_hartid = 0x05,
+            moduletype = "RemoteCPU",
             args = {"&qemu_inst"},
             cpu = {
                 plic = { mem = { address = 0xE000E000, size = 0x10000}, num_sources = 1 },
             },
-            memory = { 
-                target_socket = {address = 0xE001E000 , size = 0x10000 },
-                shared_memory=true,
-            },
-            
 
         },
     },
