@@ -4,8 +4,8 @@ add_executable(riscv64-base-vp
     src/main.cc
 )
 
-add_executable(riscv64_cpu
-    src/riscv64_cpu.cc
+add_executable(riscv_cpu
+    src/riscv_cpu.cc
 )
 
 target_link_libraries(riscv64-base-vp
@@ -13,7 +13,7 @@ target_link_libraries(riscv64-base-vp
     GreenSocs::qbox
 )
 
-target_link_libraries(riscv64_cpu
+target_link_libraries(riscv_cpu
     ${TARGET_LIBS}
     GreenSocs::qbox
 )
@@ -25,7 +25,7 @@ target_include_directories(
   )
 
   target_include_directories(
-    riscv64_cpu PUBLIC
+    riscv_cpu PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/systemc-components>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/qemu-components>
   )

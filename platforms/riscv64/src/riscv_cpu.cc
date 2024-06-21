@@ -1,4 +1,4 @@
-#include "riscv64_cpu.h"
+#include "riscv_cpu.h"
 #include <module_factory_container.h>
 
 class VSTPlatform : public gs::ModuleFactory::ContainerDeferModulesConstruct

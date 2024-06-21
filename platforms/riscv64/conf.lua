@@ -15,7 +15,7 @@ function top()
  BUILD_DIRECTORY = GET("build_directory")
 
 if BUILD_DIRECTORY == nil then
-    BUILD_DIRECTORY = "@BUILD_DIRECTORY@"
+    BUILD_DIRECTORY = "/mnt/d/HuanNguyen/mygit/qbox/build"
 end
 
 platform = {
@@ -57,7 +57,7 @@ platform = {
     -- Creating platform including arm or riscv architecture
     plugin_0 = {
         moduletype = "RemotePass", -- can be replaced by 'Container'
-        exec_path = BUILD_DIRECTORY.."/platforms/riscv64/riscv64_cpu",
+        exec_path = BUILD_DIRECTORY.."/platforms/riscv64/riscv_cpu",
         remote_argv = {"--param=log_level=4"},
         tlm_initiator_ports_num = 2,
         tlm_target_ports_num = 0,
@@ -83,12 +83,14 @@ platform = {
 
         qemu_inst = {
             moduletype = "QemuInstance",
-            args = {"&qemu_inst_mgr", "RISCV64"},
+            -- args = {"&qemu_inst_mgr", "RISCV64"},
+            args = {"&qemu_inst_mgr", "AARCH64"},
             sync_policy = "multithread-freerunning",
         },
 
         cpu_0={
-            moduletype = "Riscv64CPU",
+            moduletype = "RiscvCPU",
+            num_hartid = 0x05,
             args = {"&qemu_inst"},
             cpu = {
                 plic = { mem = { address = 0xE000E000, size = 0x10000}, num_sources = 1 },
