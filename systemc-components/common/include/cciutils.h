@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2022 GreenSocs
+ * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All Rights Reserved.
+ * Author: GreenSocs 2022
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -127,6 +128,33 @@ public:
  * @return sc_core::sc_object* return object if found
  */
 sc_core::sc_object* find_sc_obj(sc_core::sc_object* m, std::string name, bool test = false);
+
+/**
+ * @brief Helper function to find a sc_objects of a given type
+ * @param m     current parent object (use null to start from the top)
+ * @tparam T typename being searched for
+ * @return std::vector<sc_core::sc_object*> list of sc_objects found
+ */
+template <typename T>
+std::vector<T*> find_sc_objects(sc_core::sc_object* m = nullptr)
+{
+    std::vector<T*> res;
+    if (m) {
+        T* o = dynamic_cast<T*>(m);
+        if (o) res.push_back(o);
+    }
+    std::vector<sc_core::sc_object*> children;
+    if (m) {
+        children = m->get_child_objects();
+    } else {
+        children = sc_core::sc_get_top_level_objects();
+    }
+    for (auto o : children) {
+        auto c = find_sc_objects<T>(o);
+        res.insert(res.end(), std::make_move_iterator(c.begin()), std::make_move_iterator(c.end()));
+    }
+    return res;
+}
 
 /**
  * @brief return the leaf name of the given systemc hierarchical name

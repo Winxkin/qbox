@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2022 GreenSocs
+ * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All Rights Reserved.
+ * Author: GreenSocs 2022
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -753,7 +754,4 @@ void dwmac::intr_thread()
     }
 }
 
-void module_register()
-{
-    GSC_MODULE_REGISTER_C(dwmac);
-}
+void module_register() { GSC_MODULE_REGISTER_C(dwmac); }

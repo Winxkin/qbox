@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All Rights Reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,6 +23,9 @@
 #include <libgsutils.h>
 #include <libgssync.h>
 
+#include <ports/target-signal-socket.h>
+#include <ports/initiator-signal-socket.h>
+
 #ifndef WITHOUT_QEMU
 #include <ports/target.h>
 #include <ports/initiator.h>
@@ -39,7 +41,7 @@
 namespace gs {
 namespace ModuleFactory {
 
-class ContainerBase : public sc_core::sc_module, public transaction_forwarder_if<CONTAINER>
+class ContainerBase : public virtual sc_core::sc_module, public transaction_forwarder_if<CONTAINER>
 {
     /**
      * @brief construct a module using the pre-register CCI functor, with typed arguments from a CCI
@@ -63,7 +65,17 @@ public:
         }
 
         if (v.try_get<gs::cci_constructor_vl>(m_fac)) {
-            return (m_fac)(name, args);
+            /**
+             * (m_fac)(name, args) will return raw pointer of unmanaged dynamically allocated moduletype:
+             *  new moduletype(name, args)
+             */
+            sc_core::sc_module* mod = (m_fac)(name, args);
+            if (mod) {
+                m_constructedModules.emplace_back(mod);
+                return mod;
+            } else {
+                SC_REPORT_ERROR("ModuleFactory", ("Null module type: " + moduletype).c_str());
+            }
         } else {
             SC_REPORT_ERROR("ModuleFactory", ("Can't find module type: " + moduletype).c_str());
         }
@@ -407,6 +419,7 @@ public:
 private:
     bool m_defer_modules_construct;
     std::list<sc_core::sc_module*> m_allModules;
+    std::list<std::shared_ptr<sc_core::sc_module>> m_constructedModules;
 
     std::set<void*> m_dls;
 
@@ -426,13 +439,39 @@ public:
     std::vector<cci::cci_param<gs::cci_constructor_vl>*> registered_mods;
     sc_core::sc_object* container_mod_arg;
 
-    ~ContainerBase()
+    virtual ~ContainerBase()
     {
         m_allModules.clear();
         for (auto l : m_dls) {
             dlclose(l);
         }
         m_dls.clear();
+    }
+
+    std::shared_ptr<sc_core::sc_module> find_module_by_name(const std::string& mod_name)
+    {
+        auto ret = std::find_if(m_constructedModules.begin(), m_constructedModules.end(),
+                                [&](auto mod) { return (mod && std::string(mod->name()) == mod_name); });
+        if (ret == m_constructedModules.end()) {
+            return nullptr;
+        }
+        return *ret;
+    }
+
+    template <typename T>
+    std::shared_ptr<sc_core::sc_module> find_module_by_cci_param(const std::string& cci_param_name, const T& cmp_value)
+    {
+        T ret_val;
+        auto ret = std::find_if(m_constructedModules.begin(), m_constructedModules.end(), [&](auto mod) {
+            return (mod && m_broker.has_preset_value(std::string(mod->name()) + "." + cci_param_name) &&
+                    m_broker.get_preset_cci_value(std::string(mod->name()) + "." + cci_param_name)
+                        .template try_get<T>(ret_val) &&
+                    (ret_val == cmp_value));
+        });
+        if (ret == m_constructedModules.end()) {
+            return nullptr;
+        }
+        return *ret;
     }
 
     /**

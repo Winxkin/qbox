@@ -50,7 +50,7 @@ else()
   set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib;\$ORIGIN/../lib/libqemu")
 endif()
 
-set(CMAKE_BUILD_RPATH
+list(APPEND CMAKE_BUILD_RPATH
     "${CMAKE_BINARY_DIR}/_deps/libqemu-build/qemu-prefix/lib/"
     "${CMAKE_BINARY_DIR}"
 )
@@ -291,13 +291,13 @@ gs_export(${PROJECT_NAME} ${QBOX_INCLUDE_DIR})
 
 if (NOT DEFINED GS_ONLY)
     install(TARGETS rpc zip DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-    add_subdirectory(platforms)
 endif()
     
 list(APPEND TARGET_LIBS ${PROJECT_NAME})
 
 if(NOT WITHOUT_QEMU)
     add_subdirectory(qemu-components)
+    add_subdirectory(platforms)
 endif()
 
 add_subdirectory(systemc-components)

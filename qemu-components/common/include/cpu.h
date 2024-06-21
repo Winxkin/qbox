@@ -1,6 +1,7 @@
 /*
- *  This file is part of libqbox
- *  Copyright (c) 2021 GreenSocs
+ * This file is part of libqbox
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All Rights Reserved.
+ * Author: GreenSocs 2021
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -150,6 +151,8 @@ protected:
     /*
      * Called by the QEMU iothread when the deadline timer expires. We kick the
      * CPU out of its execution loop for it to call the end_of_loop_cb callback.
+     * However, we should also handle the case that qemu is currently in 'sync'
+     *  - by setting the time here, we will nudge the sync thread.
      */
     void deadline_timer_cb()
     {
@@ -157,7 +160,16 @@ protected:
         // All syncing will be done in end_of_loop_cb
         m_cpu.kick();
         // Rearm timer for next time ....
-        if (!m_finished) rearm_deadline_timer();
+        if (!m_finished) {
+            rearm_deadline_timer();
+
+            /* Take this opportunity to set the time */
+            int64_t now = m_inst.get().get_virtual_clock();
+            sc_core::sc_time sc_t = sc_core::sc_time_stamp();
+            if (sc_core::sc_time(now, sc_core::SC_NS) > sc_t) {
+                m_qk->set(sc_core::sc_time(now, sc_core::SC_NS) - sc_t);
+            }
+        }
     }
 
     /*
@@ -222,7 +234,7 @@ protected:
             }
         } else {
             while (!m_cpu.can_run() && !m_finished) {
-                if (m_inst.is_kvm_enabled() || m_inst.is_hvf_enabled()) {
+                if (!m_coroutines) {
                     // In the case of accelerators, allow them to handle signals etc.
                     SCP_TRACE(())("Stopping QK");
                     m_qk->stop();              // Stop the QK, it will be enabled when we next see work to do.
@@ -267,14 +279,12 @@ protected:
      */
     void sync_with_kernel()
     {
-        sc_core::sc_time elapsed;
         int64_t now = m_inst.get().get_virtual_clock();
 
         m_cpu.set_soft_stopped(true);
 
         m_inst.get().unlock_iothread();
-
-        if (m_inst.is_kvm_enabled() || m_inst.is_hvf_enabled()) {
+        if (!m_coroutines) {
             m_qk->start(); // we may have switched the QK off, so switch it on before setting
         }
         sc_core::sc_time sc_t = sc_core::sc_time_stamp();
@@ -398,13 +408,14 @@ public:
         socket.cancel_all();
 
         /* Wait for QEMU to terminate the CPU thread */
-        if (m_inst.get_tcg_mode() == QemuInstance::TCG_MULTI && m_inst.is_tcg_enabled()) {
-            // in HVF/KVM this could hang, so only do it for tcg.
-            m_cpu.remove_sync();
-        } else { // Handle non multi- non coroutine mode (SINGLE mode)
-            m_cpu.set_unplug(true);
-            m_cpu.halt(true);
-        }
+        /*
+         * Theoretically we should m_cpu.remove_sync(); here, however if QEMU is in the process of an io operation or an
+         * exclusive cpu region, it will end up waiting for the io operation to finish (effectively waiting for the
+         * SystemC thread, or potentially another CPU that wont get the chance to exit)
+         */
+        m_cpu.set_unplug(true);
+        m_cpu.halt(true);
+
         m_inst.get().unlock_iothread();
         m_cpu.kick(); // Just in case the CPU is currently in the big lock waiting
     }

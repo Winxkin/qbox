@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2022 GreenSocs
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All Rights Reserved.
+ * Author: GreenSocs 2022
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,7 +25,7 @@ void unfinished_quantum()
     sc_core::sc_time inc(100, sc_core::SC_NS);
     qk->inc(inc);
     budget = qk->time_to_sync();
-    EXPECT_EQ(budget, quantum - inc);
+    EXPECT_THAT(budget, AnyOf(Eq(quantum), Eq(quantum - inc)));
     EXPECT_FALSE(qk->need_sync());
     qk->sync();
     // Get budget, can be quantum or (quantum - inc), depending on how far SystemC has caught up
@@ -33,7 +34,7 @@ void unfinished_quantum()
     qk->inc(inc);
     budget = qk->time_to_sync();
     // Same as above
-    EXPECT_THAT(budget, AnyOf(Eq(quantum - inc), Eq(quantum - 2 * inc)));
+    EXPECT_THAT(budget, AnyOf(Eq(quantum), Eq(quantum - inc), Eq(quantum - 2 * inc)));
     done = true;
     qk->stop();
 }

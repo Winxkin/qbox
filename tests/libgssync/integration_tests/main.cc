@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2022 GreenSocs
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All Rights Reserved.
+ * Author: GreenSocs 2022
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -85,13 +86,13 @@ public:
  * TLM Convenience
  **********************/
 SC_MODULE (Model) {
-    Checker& checker;
+    Checker & checker;
 
 public:
     cci::cci_param<std::string> moduletype;
-    virtual void entry(){};
-    virtual void stop(){};
-    virtual void exit(){};
+    virtual void entry() {};
+    virtual void stop() {};
+    virtual void finish() {};
     Model(sc_module_name _name, Checker & _checker)
         : sc_module(_name)
         , checker(_checker)
@@ -328,7 +329,7 @@ public:
         running = false;
         qk->stop();
     }
-    void exit()
+    void finish()
     {
         while (active) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -394,7 +395,7 @@ public:
         checker.stopEvent.notify(SC_ZERO_TIME);
     }
     void stop() { running = false; }
-    void exit() {}
+    void finish() {}
 };
 GSC_MODULE_REGISTER_ORIG_1(MasterSimple, Checker&);
 
@@ -531,7 +532,7 @@ public:
     }
     void stop() { running = false; }
 
-    void exit() {}
+    void finish() {}
 };
 GSC_MODULE_REGISTER_ORIG_1(Clock, Checker&);
 
@@ -544,7 +545,7 @@ public:
     {
         if (use) rtl.enable();
     }
-    void exit() {}
+    void finish() {}
     void stop() { rtl.disable(); }
 
     cci::cci_param<bool> use;
@@ -557,10 +558,10 @@ public:
 GSC_MODULE_REGISTER_ORIG_1(RealTimeClockLimiter, Checker&);
 
 SC_MODULE (tests) {
-    Checker& checker;
+    Checker & checker;
 
     SC_MODULE (atest) {
-        Checker& checker;
+        Checker & checker;
 
         std::vector<Model*> allModels;
         std::vector<gs::inlinesync*> inlinesyncs;
@@ -647,10 +648,10 @@ SC_MODULE (tests) {
             }
         }
 
-        void exit()
+        void finish()
         {
             for (auto m : allModels) {
-                m->exit();
+                m->finish();
             }
             for (auto h : handles) {
                 if (!h.terminated()) h.disable(SC_INCLUDE_DESCENDANTS);
@@ -688,11 +689,10 @@ public:
                 sc_start(50, SC_MS);
                 // drain everything
                 while (sc_pending_activity()) { // process/propogate pending events
-                    sc_core::sc_time t = sc_time_to_pending_activity();
-                    sc_start(t);
+                    sc_core::sc_time p = sc_time_to_pending_activity();
+                    sc_start(p);
                 }
-
-                t->exit();
+                t->finish();
                 sc_start(50, SC_MS);
             }
             checker.finishedTest();
