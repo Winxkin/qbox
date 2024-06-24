@@ -22,7 +22,7 @@
 #include "remote.h"
 #include "pass/include/pass.h"
 #include <module_factory_registery.h>
-#include "RTL_Models/dummy/include/dummy.h"
+#include "dummy/include/dummy.h"
 
 class RiscvCPU : public sc_core::sc_module
 {

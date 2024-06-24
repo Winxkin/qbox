@@ -22,6 +22,7 @@
 #include "remote.h"
 #include "pass/include/pass.h"
 #include <module_factory_registery.h>
+#include "dummy/include/dummy.h"
 
 class RemoteCPU : public sc_core::sc_module
 {

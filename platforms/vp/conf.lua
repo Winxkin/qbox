@@ -31,7 +31,7 @@ platform = {
             moduletype = "gs_memory",
             target_socket = {address=0x0, size=0x20000, bind = "&router.initiator_socket"},
             shared_memory=true,
-            load={bin_file=top().."fw/vp/cortex-m55.bin", offset=0},
+            load={bin_file=top().."fw/Riscv64/hello.elf", offset=0},
         },
 
     keep_alive_0 = {
@@ -44,18 +44,18 @@ platform = {
        ansi_highlight = "";
     };
 
-        pl011_uart_0 =  {
-        moduletype = "Pl011",
-        dylib_path = "uart-pl011";
-        target_socket = {address= 0xc0000000, size=0x1000, bind = "&router.initiator_socket"},
-        irq = {bind = "&plugin_0.target_signal_socket_0"},
-        backend_socket = { bind = "&charbackend_stdio_0.biflow_socket"  },
-        },
+    pl011_uart_0 =  {
+    moduletype = "Pl011",
+    dylib_path = "uart-pl011";
+    target_socket = {address= 0xc0000000, size=0x1000, bind = "&router.initiator_socket"},
+    irq = {bind = "&plugin_0.target_signal_socket_0"},
+    backend_socket = { bind = "&charbackend_stdio_0.biflow_socket"  },
+    },
 
     plugin_0 = {
         moduletype = "RemotePass", -- can be replaced by 'Container'
         exec_path = BUILD_DIRECTORY.."/platforms/vp/vp_cpu",
-        remote_argv = {"--param=log_level=4"},
+        remote_argv = {"--param=log_level=5"},
         tlm_initiator_ports_num = 2,
         tlm_target_ports_num = 0,
         target_signals_num = 1,
@@ -93,6 +93,11 @@ platform = {
             moduletype = "gs_memory",
             target_socket = {address = 0xE001E000 , size = 0x10000 , bind = "&cpu_0.router.initiator_socket"},
             shared_memory=true,
+        },
+
+        dummy = {
+            moduletype = "dummy",
+            target_socket = {address = 0xE002E000 , size = 0x10000 , bind = "&cpu_0.router.initiator_socket"},
         }
     },
     
