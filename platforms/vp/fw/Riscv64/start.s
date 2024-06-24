@@ -41,6 +41,7 @@ entry_main:
     li a0, 0    # argc = 0
     li a1, 0    # argv = NULL
     li a2, 0    # envp = NULL
+    call uart_driver_init
     call main
 
 _idle:                  # Infinite loop

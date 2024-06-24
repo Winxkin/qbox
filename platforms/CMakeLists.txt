@@ -47,5 +47,6 @@ else()
     message("The build is done from a non-Linux system.")
 endif()
 
-# add_subdirectory(cortex-m55-remote)
+add_subdirectory(cortex-m55-remote)
+add_subdirectory(riscv64)
 add_subdirectory(vp)
