@@ -1,4 +1,4 @@
-#include "nvic.h"
+// #include "nvic.h"
 
 void uart_driver_init(void)
 {
@@ -15,11 +15,11 @@ static void uart_puts(const char *str)
     }
 }
 
-void c_entry(void)
+void main(void)
 {
-    nvic_enable_irq(0);
+    // nvic_enable_irq(0);
 
-    uart_puts("Hello from cortex-m55!\r\n");
+    uart_puts("Hello from risc-v 64 core!\r\n");
 
     while (1) {
         asm volatile ("wfi");
