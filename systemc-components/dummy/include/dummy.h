@@ -56,17 +56,22 @@ public:
         switch (trans.get_command()) {
         case tlm::TLM_WRITE_COMMAND:
             SCP_TRACE(()) << "dummy TLM_WRITE_COMMAND";
+            SCP_TRACE(()) << "-----------------------";
+            SCP_TRACE(()) << "      TM is Pass       ";
+            SCP_TRACE(()) << "-----------------------";
             exit(0);
             break;
         case tlm::TLM_READ_COMMAND:
             SCP_TRACE(()) << "dummy TLM_READ_COMMAND";
+            SCP_TRACE(()) << "-----------------------";
+            SCP_TRACE(()) << "      TM is Fail       ";
+            SCP_TRACE(()) << "-----------------------";
             exit(0);
             break;
         default:
             break;
         }
-    }
-
+    };
 
 };
 
