@@ -15,7 +15,7 @@ function top()
  BUILD_DIRECTORY = GET("build_directory")
 
 if BUILD_DIRECTORY == nil then
-    BUILD_DIRECTORY = "@BUILD_DIRECTORY@"
+    BUILD_DIRECTORY = "/mnt/d/HuanNguyen/Viettel/qbox/build"
 end
 
 platform = {
@@ -90,13 +90,17 @@ platform = {
             cpu = {
                 nvic = { mem = { address = 0xE000E000, size = 0x10000}, num_irq = 1 },
             },
-
-        dummy = {
-            moduletype = "dummy",
-            target_socket = {address = 0xE002E000 , size = 0x10000 , bind = "&cpu_0.router.initiator_socket"},
-        }
-        
+            dummy = {
+                target_socket = {address = 0xF0000000 , size = 0x10000},
+            }
         },
+
+        -- dummy = {
+        --     moduletype = "dummy",
+        --     target_socket = {address = 0xF0000000 , size = 0x10000 , bind = "&cpu_0.router.initiator_socket"},
+        -- },
+        
+    
     },
     
 }

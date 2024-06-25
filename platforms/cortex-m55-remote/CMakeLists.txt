@@ -31,6 +31,6 @@ target_include_directories(
   )
 
 set(BUILD_DIRECTORY "${CMAKE_BINARY_DIR}")
-configure_file(${PROJECT_SOURCE_DIR}/platforms/cortex-m55-remote/conf.lua.in ${PROJECT_SOURCE_DIR}/platforms/cortex-m55-remote/conf.lua)
+# configure_file(${PROJECT_SOURCE_DIR}/platforms/cortex-m55-remote/conf.lua.in ${PROJECT_SOURCE_DIR}/platforms/cortex-m55-remote/conf.lua)
 
 gs_enable_testing()

@@ -16,6 +16,7 @@
 #include <cpu_arm/cpu_arm_cortex_m55/include/cortex-m55.h>
 #include <qemu-instance.h>
 #include "gs_memory/include/gs_memory.h"
+#include "dummy/include/dummy.h"
 #include "router/include/router.h"
 #include "remote.h"
 #include "pass/include/pass.h"
@@ -37,6 +38,7 @@ public:
         , m_qemu_inst(qemu_inst)
         , m_router("router")
         , m_cpu("cpu", m_qemu_inst)
+        , m_dummy("dummy")
     {
         unsigned int m_irq_num = m_broker.get_param_handle(std::string(this->name()) + ".cpu.nvic.num_irq")
                                      .get_cci_value()
@@ -48,6 +50,7 @@ public:
 
         m_router.initiator_socket.bind(m_cpu.m_nvic.socket);
         m_cpu.socket.bind(m_router.target_socket);
+        m_router.initiator_socket.bind(m_dummy.socket);
     }
 
 private:
@@ -56,6 +59,7 @@ private:
     QemuInstance& m_qemu_inst;
     gs::router<> m_router;
     cpu_arm_cortexM55 m_cpu;
+    dummy m_dummy;
 };
 GSC_MODULE_REGISTER(RemoteCPU, sc_core::sc_object*);
 #endif
