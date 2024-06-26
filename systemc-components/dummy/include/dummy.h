@@ -11,6 +11,8 @@
 #include <mutex>
 #include <queue>
 #include <iostream>
+#include <iterator>
+#include <map>
 
 #include "tlm.h"
 #include "tlm_utils/simple_target_socket.h"
@@ -24,6 +26,8 @@
 #include <scp/report.h>
 #include <scp/helpers.h>
 #include <tlm_sockets_buswidth.h>
+#include "dummy_regif.h"
+
 
 
 
@@ -38,7 +42,7 @@ public:
     {
         std::cout << "[dummy] constructor\n";
         socket.register_b_transport(this, &dummy::b_transport);
-        this->dummy_reg = 0;
+        init_register();
     }
 
     dummy() = delete;
@@ -59,31 +63,38 @@ public:
         switch (trans.get_command()) {
         case tlm::TLM_WRITE_COMMAND:
         {
-            std::cout << "[dummy] TLM_WRITE_COMMAND\n";
+            std::cout << "[dummy] TLM_WRITE_COMMAND     addr: " << addr << "    len: " << len << "\n";
             uint32_t reg_temp =  (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
             this->update_reg(addr, reg_temp);
-            this->check_dummy_reg();
+            this->check_dummy_result();
             break;
         }
         case tlm::TLM_READ_COMMAND:
         {
-            std::cout << "[dummy] TLM_READ_COMMAND\n";
+            std::cout << "[dummy] TLM_READ_COMMAND     addr: " << addr << "    len: " << len << "\n";
             break;
         }
         default:
             break;
         }
     };
+
+    void init_register()
+    {
+        this->dummy_reg.insert(std::pair<unsigned int, uint32_t>(DUMMY_RESULT,0));
+
+        std::cout << "[dummy] Initialize registers\n";
+    };
+
 private:
     void update_reg(uint64_t addr, uint32_t value)
     {
-        this->dummy_reg = value;
-        std::cout << "[dummy] [update_reg] dummy_reg: " << dummy_reg << "\n";
+        this->dummy_reg[addr] = value;
     };
 
-    void check_dummy_reg()
+    void check_dummy_result()
     {
-        if(dummy_reg == 0)
+        if(dummy_reg[DUMMY_RESULT] == 0)
         {
             std::cout << "-----------------------\n";
             std::cout << "      TM is Pass       \n";
@@ -99,7 +110,8 @@ private:
         }
     };
 
-    uint32_t dummy_reg;
+
+    std::map<unsigned int, uint32_t> dummy_reg;
 
 };
 
