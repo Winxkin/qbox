@@ -10,7 +10,6 @@
 
 #include <mutex>
 #include <queue>
-#include <iostream>
 #include <iterator>
 #include <map>
 
@@ -26,12 +25,13 @@
 #include <scp/report.h>
 #include <scp/helpers.h>
 #include <tlm_sockets_buswidth.h>
-#include "dummy_regif.h"
+#include "dummy_regadd.h"
+#include "RegisterIF.h"
 
 
 
 
-class dummy : public sc_core::sc_module
+class dummy : public sc_core::sc_module, RegisterInterface
 {
     SCP_LOGGER();
 public:
@@ -64,9 +64,8 @@ public:
         case tlm::TLM_WRITE_COMMAND:
         {
             std::cout << "[dummy] TLM_WRITE_COMMAND     addr: " << addr << "    len: " << len << "\n";
-            uint32_t reg_temp =  (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
-            this->update_reg(addr, reg_temp);
-            this->check_dummy_result();
+            update(addr, ptr);
+            check_dummy_result();
             break;
         }
         case tlm::TLM_READ_COMMAND:
@@ -81,20 +80,22 @@ public:
 
     void init_register()
     {
-        this->dummy_reg.insert(std::pair<unsigned int, uint32_t>(DUMMY_RESULT,0));
-
-        std::cout << "[dummy] Initialize registers\n";
+        this->add_register("DUMMY_RESULT", DUMMY_RESULT , 0);
+        std::cout << "[dummy] Initialize registers done.\n";
     };
 
 private:
-    void update_reg(uint64_t addr, uint32_t value)
+
+    void update(uint64_t address, unsigned char* ptr)
     {
-        this->dummy_reg[addr] = value;
-    };
+        uint32_t reg_temp =  (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
+        update_register(address, reg_temp);
+    }
+
 
     void check_dummy_result()
     {
-        if(dummy_reg[DUMMY_RESULT] == 0)
+        if(registers["DUMMY_RESULT"].get_value() == 0)
         {
             std::cout << "-----------------------\n";
             std::cout << "      TM is Pass       \n";
@@ -110,8 +111,6 @@ private:
         }
     };
 
-
-    std::map<unsigned int, uint32_t> dummy_reg;
 
 };
 
