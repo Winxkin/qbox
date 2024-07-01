@@ -2,6 +2,9 @@
  * Copyright (c) 2022 GreenSocs
  *
  * SPDX-License-Identifier: BSD-3-Clause
+ * The common design for register interface
+ * Author: Huan Nguyen-Duy
+ * date: 01/07/2024
  */
 #ifndef _REGISTERIF_H
 #define _REGISTERIF_H
