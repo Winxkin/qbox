@@ -87,6 +87,9 @@ platform = {
         cpu_0={
             moduletype = "RemoteCPU",
             args = {"&qemu_inst"},
+            dummy = {
+                target_socket = {address = 0xE002E000 , size = 0x10000},
+            }
         },
 
         ram_1 = {
@@ -95,10 +98,6 @@ platform = {
             shared_memory=true,
         },
 
-        dummy = {
-            moduletype = "dummy",
-            target_socket = {address = 0xE002E000 , size = 0x10000 , bind = "&cpu_0.router.initiator_socket"},
-        }
     },
     
 }
