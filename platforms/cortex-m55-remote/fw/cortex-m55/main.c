@@ -1,9 +1,6 @@
 #include "nvic.h"
 
-#define PASS 0
-#define FAIL 1
 
-#define DUMMY_REG_ADD 0xF0000000
 
 void uart_driver_init(void)
 {
@@ -22,12 +19,10 @@ static void uart_puts(const char *str)
 
 void c_entry(void)
 {
-    nvic_enable_irq(0);
+    // nvic_enable_irq(0);
 
     uart_puts("Hello from cortex-m55!\r\n");
-    *(volatile unsigned int *)DUMMY_REG_ADD = FAIL;
+    *(volatile unsigned int *)0xF0000000 = 1;
 
-    while (1) {
-        asm volatile ("wfi");
-    }
+
 }
