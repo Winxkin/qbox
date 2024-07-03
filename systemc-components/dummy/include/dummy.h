@@ -40,7 +40,7 @@ public:
     dummy(sc_core::sc_module_name name)
         : socket("target_socket")
     {
-        std::cout << "[dummy] constructor\n";
+        // std::cout << "[dummy] constructor\n";
         socket.register_b_transport(this, &dummy::b_transport);
         init_register();
     }
@@ -63,14 +63,14 @@ public:
         switch (trans.get_command()) {
         case tlm::TLM_WRITE_COMMAND:
         {
-            std::cout << "[dummy] TLM_WRITE_COMMAND     addr: " << addr << "    len: " << len << "\n";
+            // std::cout << "[dummy] TLM_WRITE_COMMAND     addr: " << addr << "    len: " << len << "\n";
             update(addr, ptr);
             check_dummy_result();
             break;
         }
         case tlm::TLM_READ_COMMAND:
         {
-            std::cout << "[dummy] TLM_READ_COMMAND     addr: " << addr << "    len: " << len << "\n";
+            // std::cout << "[dummy] TLM_READ_COMMAND     addr: " << addr << "    len: " << len << "\n";
             break;
         }
         default:
@@ -81,7 +81,7 @@ public:
     void init_register()
     {
         this->add_register("DUMMY_RESULT", DUMMY_RESULT , 0);
-        std::cout << "[dummy] Initialize registers done.\n";
+        // std::cout << "[dummy] Initialize registers done.\n";
     };
 
 private:

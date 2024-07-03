@@ -47,7 +47,7 @@ class RegisterInterface {
 public:
     void add_register(std::string name, uint64_t address, uint32_t init) {
         registers.emplace(name, Register(name, address, init));
-        printf("[Adding new register]   Register name: [%s], address [%lX], initialize value [%X] \n", registers[name].get_name().c_str(), registers[name].get_address(), registers[name].get_value());
+        // printf("[Adding new register]   Register name: [%s], address [%lX], initialize value [%X] \n", registers[name].get_name().c_str(), registers[name].get_address(), registers[name].get_value());
     };
 
     Register& operator[](std::string name) {
@@ -62,7 +62,7 @@ public:
         for (auto& reg : registers) {
             if (reg.second.get_address() == address) {
                 reg.second.set_value(value);
-                printf("Register %s change to value -> [%X] \n", reg.second.get_name().c_str(), reg.second.get_value() );
+                // printf("Register %s change to value -> [%X] \n", reg.second.get_name().c_str(), reg.second.get_value() );
                 return;
             }
         }
