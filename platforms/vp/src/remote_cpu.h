@@ -44,11 +44,13 @@ public:
         , m_gdb_port("gdb_port", 0, "GDB port")
         , m_qemu_inst(qemu_inst)
         , m_router("router")
-        , m_cpu("cpu", m_qemu_inst, 64)
+        , m_cpu("cpu", m_qemu_inst, 0x0)
+        , m_dummy("dummy")
     {
         SCP_INFO(()) << "RemoteCPU constructor";
         
         m_cpu.socket.bind(m_router.target_socket);
+        m_router.initiator_socket.bind(m_dummy.socket);
     }
 
 private:
@@ -57,6 +59,7 @@ private:
     QemuInstance& m_qemu_inst;
     gs::router<> m_router;
     cpu_riscv64 m_cpu;
+    dummy m_dummy;
 };
 GSC_MODULE_REGISTER(RemoteCPU, sc_core::sc_object*);
 #endif
