@@ -22,7 +22,9 @@ void c_entry(void)
     // nvic_enable_irq(0);
 
     uart_puts("Hello from cortex-m55!\r\n");
-    *(volatile unsigned int *)0xF0000000 = 1;
+    *(volatile unsigned int *)0xF0000000 = 0x0;
 
-
+    while (1) {
+        asm volatile ("wfi");
+    }
 }
