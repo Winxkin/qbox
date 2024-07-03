@@ -44,13 +44,21 @@ platform = {
        ansi_highlight = "";
     };
 
-    pl011_uart_0 =  {
-    moduletype = "Pl011",
-    dylib_path = "uart-pl011";
-    target_socket = {address= 0xc0000000, size=0x1000, bind = "&router.initiator_socket"},
-    irq = {bind = "&plugin_0.target_signal_socket_0"},
-    backend_socket = { bind = "&charbackend_stdio_0.biflow_socket"  },
-    },
+    -- pl011_uart_0 =  {
+    -- moduletype = "Pl011",
+    -- dylib_path = "uart-pl011";
+    -- target_socket = {address= 0xc0000000, size=0x1000, bind = "&router.initiator_socket"},
+    -- irq = {bind = "&plugin_0.target_signal_socket_0"},
+    -- backend_socket = { bind = "&charbackend_stdio_0.biflow_socket"  },
+    -- },
+
+    ibex_uart_0 =  {
+        moduletype = "ibex_uart",
+        dylib_path = "uart-ibex";
+        target_socket = {address= 0xc0000000, size=0x1000, bind = "&router.initiator_socket"},
+        irq_rx_watermark = {bind = "&plugin_0.target_signal_socket_0"},
+        backend_socket = { bind = "&charbackend_stdio_0.biflow_socket"  },
+        },
 
     plugin_0 = {
         moduletype = "RemotePass", -- can be replaced by 'Container'
