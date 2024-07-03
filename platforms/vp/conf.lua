@@ -92,11 +92,6 @@ platform = {
             }
         },
 
-        ram_1 = {
-            moduletype = "gs_memory",
-            target_socket = {address = 0xE001E000 , size = 0x10000 , bind = "&cpu_0.router.initiator_socket"},
-            shared_memory=true,
-        },
 
     },
     
