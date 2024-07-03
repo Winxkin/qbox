@@ -27,12 +27,12 @@ LOAD main.o
  .rodata.str1.8
                 0x0000000000000028       0x1d main.o
 
-.text.startup   0x0000000000000046       0x1a
- .text.startup  0x0000000000000046       0x1a main.o
+.text.startup   0x0000000000000046       0x24
+ .text.startup  0x0000000000000046       0x24 main.o
                 0x0000000000000046                main
 
-.rela.dyn       0x0000000000000060        0x0
- .rela.text     0x0000000000000060        0x0 start.o
+.rela.dyn       0x0000000000000070        0x0
+ .rela.text     0x0000000000000070        0x0 start.o
 
 .data           0x0000000000010000        0x0
  *(.data)
