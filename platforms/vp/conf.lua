@@ -90,7 +90,10 @@ platform = {
             args = {"&qemu_inst"},
             dummy = {
                 target_socket = {address = 0xE002E000 , size = 0x10000},
-            }
+            },
+            counter = {
+                target_socket = {address = 0xE003E000 , size = 0x10000},
+            },
         },
 
 

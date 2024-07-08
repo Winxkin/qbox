@@ -24,6 +24,7 @@
 #include "pass/include/pass.h"
 #include <module_factory_registery.h>
 #include "dummy/include/dummy.h"
+#include "counter/include/counter.h"
 
 class RemoteCPU : public sc_core::sc_module
 {
@@ -48,15 +49,26 @@ public:
         , m_router("router")
         , m_cpu("cpu", m_qemu_inst, 0x0)
         , m_dummy("dummy")
+        , m_counter("counter")
     {
         SCP_INFO(()) << "RemoteCPU constructor";
+
+        // binding sockets
         
         m_cpu.socket.bind(m_router.target_socket);
         m_router.initiator_socket.bind(m_dummy.socket);
+        m_router.initiator_socket.bind(m_counter.socket);
+
+        // binding signal 
+        m_counter.clk(sysclk);
+        m_counter.reset(sig_sysrst);
+        m_counter.out(sig_counter_out);
     }
 
 private:
     // define signal here.
+    sc_core::sc_signal<bool> sig_sysrst;
+    sc_core::sc_signal<int> sig_counter_out;  
 
 private:
     // define models here.
@@ -67,6 +79,7 @@ private:
     cpu_riscv64 m_cpu;
     dummy m_dummy;
     sc_core::sc_clock sysclk;
+    Counter m_counter;
 };
 GSC_MODULE_REGISTER(RemoteCPU, sc_core::sc_object*);
 #endif
