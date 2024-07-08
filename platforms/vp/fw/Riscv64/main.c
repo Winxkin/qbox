@@ -21,7 +21,8 @@ void main(void)
 
     uart_puts("Hello from risc-v 64 core!\r\n");
 
-    *(volatile unsigned int *)0xE002E000 = 0x00;
+    *(volatile unsigned int *)0xE002E000 = 0x01;
+
 
     
 }

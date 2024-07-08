@@ -9,6 +9,7 @@
 #define __REMOTE_CORTEX_M55__
 
 #include <systemc>
+#include <vector>
 #include <tlm>
 #include <cci_configuration>
 #include <libgsutils.h>
@@ -41,6 +42,7 @@ public:
     RemoteCPU(const sc_core::sc_module_name& n, QemuInstance& qemu_inst)
         : sc_core::sc_module(n)
         , m_broker(cci::cci_get_broker())
+        , sysclk("systemclk",10, sc_core::SC_US)
         , m_gdb_port("gdb_port", 0, "GDB port")
         , m_qemu_inst(qemu_inst)
         , m_router("router")
@@ -54,12 +56,17 @@ public:
     }
 
 private:
+    // define signal here.
+
+private:
+    // define models here.
     cci::cci_broker_handle m_broker;
     cci::cci_param<int> m_gdb_port;
     QemuInstance& m_qemu_inst;
     gs::router<> m_router;
     cpu_riscv64 m_cpu;
     dummy m_dummy;
+    sc_core::sc_clock sysclk;
 };
 GSC_MODULE_REGISTER(RemoteCPU, sc_core::sc_object*);
 #endif
