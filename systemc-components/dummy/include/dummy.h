@@ -12,6 +12,9 @@
 #include <queue>
 #include <iterator>
 #include <map>
+#include <vector>
+#include <iostream>
+#include <cstdint>
 
 #include "tlm.h"
 #include "tlm_utils/simple_target_socket.h"
@@ -30,88 +33,80 @@
 
 
 
-
-class dummy : public sc_core::sc_module, RegisterInterface
+class dummy : public sc_core::sc_module
 {
     SCP_LOGGER();
+private:
+    std::string m_name;
+    RegisterInterface regs;
+
+private:
+    void InitializeRegister()
+    {
+        regs.add_register("dummy_RESULT", 0x00, 0);
+        regs.set_register_callback("dummy_RESULT", std::bind(&dummy::cb_dummy_RESULT, this, std::placeholders::_1, std::placeholders::_2));
+    }
+
+    void cb_dummy_RESULT(const std::string& name, uint32_t value)
+    {
+        if (name == "dummy_RESULT")
+        {
+            if (value == 0x0)
+            {
+                std::cout << "-----------------------\n";
+                std::cout << "      TM is Pass       \n";
+                std::cout << "-----------------------\n";
+                exit(0);
+            }
+            else
+            {
+                std::cout << "-----------------------\n";
+                std::cout << "      TM is Fail       \n";
+                std::cout << "-----------------------\n";
+                exit(0);
+            }
+        }
+    }
+
+
 public:
     tlm_utils::simple_target_socket<dummy, DEFAULT_TLM_BUSWIDTH> socket;
 
-    dummy(sc_core::sc_module_name name)
-        : socket("target_socket")
+    dummy(sc_core::sc_module_name name) :
+        sc_core::sc_module(name),
+        m_name(name),
+        socket("target_socket")
     {
-        std::cout << "[dummy] constructor\n";
         socket.register_b_transport(this, &dummy::b_transport);
-        init_register();
+        InitializeRegister();
     }
 
-    dummy() = delete;
-    dummy(const dummy&) = delete;
-
-    ~dummy() {}
-
-    void b_transport(tlm::tlm_generic_payload& trans, sc_core::sc_time& delay)
-    {
-        unsigned char* ptr = trans.get_data_ptr();
-        uint64_t addr = trans.get_address();
-        unsigned int len = trans.get_data_length();
-
-
-        trans.set_dmi_allowed(false);
-        trans.set_response_status(tlm::TLM_OK_RESPONSE);
+    void b_transport(tlm::tlm_generic_payload& trans, sc_core::sc_time& delay) {
+        // Handle transaction
 
         switch (trans.get_command()) {
         case tlm::TLM_WRITE_COMMAND:
-        {
-            std::cout << "[dummy] TLM_WRITE_COMMAND     addr: " << addr << "    len: " << len << "\n";
-            update(addr, ptr);
-            check_dummy_result();
-            break;
+        {   
+            unsigned int wdata = 0;
+            std::memcpy(&wdata, trans.get_data_ptr(), sizeof(wdata));
+            //regs[trans.get_address()] = wdata;
+            regs.update_register(trans.get_address(), wdata);
+            std::cout << m_name << ": Received transaction with address 0x" << std::hex << trans.get_address() << " data: 0x" << std::hex << wdata << std::dec << std::endl;
+            trans.set_response_status(tlm::TLM_OK_RESPONSE);
         }
         case tlm::TLM_READ_COMMAND:
         {
-            std::cout << "[dummy] TLM_READ_COMMAND     addr: " << addr << "    len: " << len << "\n";
+            unsigned int rdata = 0;
+            rdata =(unsigned int)regs[trans.get_address()].get_value();
+            std::cout << m_name << ": Received transaction with address 0x" << std::hex << trans.get_address() << " data: 0x" << std::hex << rdata << std::dec << std::endl;
+            std::memcpy(trans.get_data_ptr(), &rdata, trans.get_data_length());
+            trans.set_response_status(tlm::TLM_OK_RESPONSE);
             break;
         }
         default:
             break;
         }
-    };
-
-    void init_register()
-    {
-        this->add_register("DUMMY_RESULT", DUMMY_RESULT , 0);
-        std::cout << "[dummy] Initialize registers done.\n";
-    };
-
-private:
-
-    void update(uint64_t address, unsigned char* ptr)
-    {
-        uint32_t reg_temp =  (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
-        update_register(address, reg_temp);
     }
-
-
-    void check_dummy_result()
-    {
-        if(registers["DUMMY_RESULT"].get_value() == 0)
-        {
-            std::cout << "-----------------------\n";
-            std::cout << "      TM is Pass       \n";
-            std::cout << "-----------------------\n";
-            exit(0);
-        }
-        else
-        {
-            std::cout << "-----------------------\n";
-            std::cout << "      TM is Fail       \n";
-            std::cout << "-----------------------\n";
-            exit(0);
-        }
-    };
-
-
 };
 
 
